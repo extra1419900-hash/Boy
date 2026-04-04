@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมแมวพาสเทลกระโดดดึ๋ง</title>
+    <style>
+        /* --- CSS: ตกแต่งหน้าตาเกม --- */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* ป้องกันการเลื่อนหน้าจอ */
+        }
+
+        #game-container {
+            width: 320px; /* ขนาดหน้าจอมือถือ */
+            height: 160px; /* ความสูงพอดีกับภาพพื้นหลัง */
+            border-bottom: 2px solid #535353;
+            position: relative;
+            overflow: hidden;
+            /* 🌸 ภาพพื้นหลังพาสเทล */
+            background-image: url('https://i.postimg.cc/bNpy7BNk/mi-m-ch-x-298-20260404141457.png');
+            background-size: auto 100%;
+            background-repeat: repeat-x;
+            /* 🎬 สั่งให้พื้นหลังขยับ */
+            animation: backgroundScroll 10s linear infinite;
+        }
+
+        /* 🎥 คีย์เฟรมสั่งให้พื้นหลังเลื่อนวนลูป */
+        @keyframes backgroundScroll {
+            from { background-position: 0 0; }
+            to { background-position: -600px 0; } /* ปรับความเร็วตรงนี้ได้ */
+        }
+
+        /* 🐈‍⬛ ตัวละครแมวพาสเทล */
+        #dino {
+            width: 60px;  /* ขนาดตัวละคร (ปรับตามความเหมาะสม) */
+            height: 60px;
+            position: absolute;
+            bottom: 5px; /* ยืนบนพื้นพอดี */
+            left: 40px;
+            /* 🔴 รูปแมวยืนนิ่ง/กระโดด */
+            background-image: url('https://i.postimg.cc/R0MwqRRd/mi-m-ch-x-298-20260404141503.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            /* 🎬 สั่งให้เล่นอนิเมชั่นเดิน (เริ่มต้น) */
+            animation: walkAnimation 0.5s steps(2) infinite;
+        }
+
+        /* 🎥 คีย์เฟรมสำหรับอนิเมชั่นเดิน (2 เฟรม) */
+        @keyframes walkAnimation {
+            from {
+                /* 🔴 รูป Sprite Sheet อนิเมชั่นเดิน */
+                background-image: url('https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png');
+                background-position: 0; /* เฟรมแรก */
+            }
+            to {
+                background-image: url('https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png');
+                background-position: -120px; /* เลื่อนไปเฟรมที่สอง (60px * 2เฟรม) */
+            }
+        }
+
+        /* 🐈‍⬛ คลาสสำหรับตอนแมวกระโดด (จะเปลี่ยนรูปและหยุดอนิเมชั่นเดิน) */
+        #dino.jumping {
+            /* 🔴 ใช้รูปรวมที่คุณบอกว่าเป็นตอนกระโดด */
+            background-image: url('https://i.postimg.cc/R0MwqRRd/mi-m-ch-x-298-20260404141503.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: none; /* ปิดอนิเมชั่นเดิน */
+        }
+
+        /* ส่วนอนิเมชั่นการกระโดด */
+        .jump {
+            animation: jumpAnimation 0.5s linear;
+        }
+
+        @keyframes jumpAnimation {
+            0% { bottom: 5px; }
+            50% { bottom: 95px; } /* ความสูงของการกระโดด */
+            100% { bottom: 5px; }
+        }
+
+        /* 📦 สิ่งกีดขวาง (ปลา/กล่อง) */
+        #cactus {
+            width: 30px; /* ขนาดสิ่งกีดขวาง */
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            bottom: 5px;
+            left: 300px;
+        }
+
+        /* คะแนน */
+        #score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: #535353;
+            background-color: rgba(255, 255, 255, 0.7); /* พื้นหลังจางๆ ให้เห็นชัด */
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="score">คะแนน: 0</div>
+        <div id="dino"></div>
+        <div id="cactus"></div>
+    </div>
+
+    <script>
+        /* --- JavaScript: ควบคุมระบบเกม --- */
+        const dino = document.getElementById("dino");
+        const cactus = document.getElementById("cactus");
+        const scoreDisplay = document.getElementById("score");
+        const gameContainer = document.getElementById("game-container");
+
+        let score = 0;
+        let isAlive = true;
+        let gameSpeed = 4; // ความเร็วเริ่มต้น
+
+        // 🔴 ลิงก์รูปสิ่งกีดขวางที่คุณส่งมา
+        const obstacleImages = [
+            'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png', // ปลา
+            'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'  // กล่อง
+        ];
+
+        // ฟังก์ชันสุ่มเลือกสิ่งกีดขวาง
+        function setRandomObstacle() {
+            const randomIndex = Math.floor(Math.random() * obstacleImages.length);
+            cactus.style.backgroundImage = `url('${obstacleImages[randomIndex]}')`;
+        }
+
+        // ฟังก์ชันสั่งให้กระโดด
+        function jump() {
+            if (!dino.classList.contains("jump") && isAlive) {
+                dino.classList.add("jump");
+                dino.classList.add("jumping"); // เปลี่ยนรูปเป็นท่ากระโดด
+                
+                // พอกระโดดเสร็จ ให้ลบคลาสออก
+                setTimeout(function () {
+                    dino.classList.remove("jump");
+                    dino.classList.remove("jumping"); // กลับไปเป็นท่าเดิน
+                }, 500);
+            }
+        }
+
+        // รองรับการแตะหน้าจอ (Touch) สำหรับมือถือ
+        gameContainer.addEventListener("touchstart", function (e) {
+            e.preventDefault(); // ป้องกันการซูมหรือเลื่อนหน้าจอ
+            jump();
+        });
+
+        // รองรับการกด Spacebar สำหรับคอมพิวเตอร์ (เผื่อคุณอยากลอง)
+        document.addEventListener("keydown", function (e) {
+            if (e.code === "Space") {
+                jump();
+            }
+        });
+
+        let cactusLeft = 300;
+        setRandomObstacle(); // ตั้งค่าสิ่งกีดขวางอันแรก
+
+        // ลูปหลักของเกม
+        function gameLoop() {
+            if (!isAlive) return;
+
+            // เลื่อนสิ่งกีดขวาง
+            cactusLeft -= gameSpeed;
+            
+            // ถ้าสิ่งกีดขวางพ้นหน้าจอ
+            if (cactusLeft < -30) {
+                cactusLeft = 300; // กลับไปเริ่มใหม่ทางขวา
+                setRandomObstacle(); // สุ่มสิ่งกีดขวางใหม่
+                score++;
+                scoreDisplay.innerText = "คะแนน: " + score;
+                
+                // เพิ่มความเร็วเกมเล็กน้อยทุกๆ 5 คะแนน
+                if (score % 5 === 0 && gameSpeed < 10) {
+                    gameSpeed += 0.5;
+                }
+            }
+            cactus.style.left = cactusLeft + "px";
+
+            // ตรวจสอบพิกัดเพื่อดูว่าชนกันไหม (ปรับให้เข้ากับสเกลตัวละครน้องแมว)
+            // 🐈‍⬛ น้องแมว: left 40px, width 60px -> ช่วงตัวคือ 40px ถึง 100px
+            // 📦 สิ่งกีดขวาง: width 30px
+            let dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom"));
+
+            if (cactusLeft < 80 && cactusLeft > 20 && dinoBottom <= 35) {
+                isAlive = false;
+                alert("จบเกม! คะแนนของคุณคือ: " + score);
+                
+                // รีเซ็ตเกมเพื่อเริ่มใหม่
+                score = 0;
+                cactusLeft = 300;
+                gameSpeed = 4; // รีเซ็ตความเร็ว
+                setRandomObstacle();
+                scoreDisplay.innerText = "คะแนน: 0";
+                isAlive = true;
+                gameLoop(); // เริ่มลูปเกมใหม่
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // เริ่มรันเกม
+        gameLoop();
+    </script>
+</body>
+</html>
