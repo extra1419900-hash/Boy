@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เกมกระโดดข้ามหัวใจ</title>
+    <title>เกมกระโดดข้ามสิ่งกีดขวาง</title>
     <style>
         html, body {
             margin: 0; padding: 0;
@@ -15,7 +15,7 @@
             touch-action: none;
         }
 
-        /* 🖼️ ปรับขนาดฉากเกมให้พอดีกับภาพในคลิปคุณ (กว้าง 360px สูง 200px) */
+        /* 🖼️ ฉากเกม */
         #game-container {
             width: 360px;
             height: 200px;
@@ -27,7 +27,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* 🧍‍♂️ ตัวละครของคุณ (ปรับสเกลให้พอดี ไม่ใหญ่เกินไป) */
+        /* 🧍‍♂️ ตัวละครของคุณ */
         #character {
             width: 50px;
             height: 50px;
@@ -40,7 +40,6 @@
             background-position: center;
         }
 
-        /* อนิเมชั่นกระโดดให้เหินแบบพอดีๆ */
         .jump {
             animation: jumpAnimation 0.6s ease-out;
         }
@@ -51,7 +50,7 @@
             100% { bottom: 5px; }
         }
 
-        /* 📦 สิ่งกีดขวาง (ขยายให้ใหญ่ขึ้นตามที่คุณสั่ง!) */
+        /* 📦 สิ่งกีดขวาง */
         #obstacle {
             width: 40px;
             height: 40px;
@@ -96,7 +95,7 @@
             cursor: pointer;
         }
 
-        /* 🕹️ ปุ่มกระโดดแยก คราวนี้โดดได้แน่นอน! */
+        /* 🕹️ ปุ่มกระโดดแยก */
         #jump-btn {
             position: absolute;
             bottom: 10px;
@@ -108,6 +107,26 @@
             border: none;
             border-radius: 50%;
             font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* 🔄 ปุ่ม Reset */
+        #reset-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 60px;
+            height: 30px;
+            background-color: rgba(255, 68, 68, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
             font-weight: bold;
             display: flex;
             justify-content: center;
@@ -134,6 +153,7 @@
         </div>
 
         <button id="jump-btn">JUMP</button>
+        <button id="reset-btn" onclick="resetGame()">RESET</button>
     </div>
 
     <script>
@@ -151,12 +171,12 @@
         let gameSpeed = 1.0; 
         let obstacleLeft = 360;
 
-        const imgJump = 'https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png'; // ท่ากระโดด
-        const imgStand = 'https://i.postimg.cc/j5McR9YX/mi-m-ch-x-298-20260404141500.png'; // ท่าหยุด
+        const imgJump = 'https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png'; 
+        const imgStand = 'https://i.postimg.cc/j5McR9YX/mi-m-ch-x-298-20260404141500.png'; 
         
         const obstacleImages = [
-            'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png', // ปลา
-            'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'  // กล่อง
+            'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png', 
+            'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'  
         ];
 
         hiScoreDisplay.innerText = "สูงสุด: " + hiScore;
@@ -169,11 +189,11 @@
         function jump() {
             if (!character.classList.contains("jump") && isAlive) {
                 character.classList.add("jump");
-                character.style.backgroundImage = `url('${imgJump}')`; // เปลี่ยนรูปกระโดด
+                character.style.backgroundImage = `url('${imgJump}')`; 
                 
                 setTimeout(function () {
                     character.classList.remove("jump");
-                    character.style.backgroundImage = `url('${imgStand}')`; // กลับมายืนท่าเดิม
+                    character.style.backgroundImage = `url('${imgStand}')`; 
                 }, 600);
             }
         }
@@ -182,14 +202,30 @@
             menuOverlay.style.display = "none";
             isAlive = true;
             score = 0;
-            gameSpeed = 1.0; // ช้ามากระดับเต่าคลานให้คุณชิลล์ก่อน
+            gameSpeed = 1.0; 
             obstacleLeft = 360;
             scoreDisplay.innerText = "คะแนน: 0";
             setRandomObstacle();
             gameLoop();
         }
 
-        // เชื่อมปุ่มกดกระโดด
+        // ฟังก์ชันรีเซ็ตเกมใหม่ทั้งหมด
+        function resetGame() {
+            isAlive = false;
+            score = 0;
+            gameSpeed = 1.0;
+            obstacleLeft = 360;
+            scoreDisplay.innerText = "คะแนน: 0";
+            obstacle.style.left = "360px";
+            character.classList.remove("jump");
+            character.style.bottom = "5px";
+            character.style.backgroundImage = `url('${imgStand}')`;
+            
+            menuTitle.innerText = "เกมถูกรีเซ็ตแล้ว!";
+            document.getElementById("play-btn").innerText = "PLAY";
+            menuOverlay.style.display = "flex";
+        }
+
         jumpBtn.addEventListener("touchstart", function(e) {
             e.preventDefault();
             jump();
@@ -200,14 +236,12 @@
 
             obstacleLeft -= gameSpeed;
             
-            // ขยายสิ่งกีดขวางให้พ้นหน้าจอ ค่อยสลับรูปใหม่
             if (obstacleLeft < -40) {
                 obstacleLeft = 360;
                 setRandomObstacle();
                 score++;
                 scoreDisplay.innerText = "คะแนน: " + score;
                 
-                // ทุกๆ 5 คะแนนจะเร็วขึ้นนิดเดียว
                 if (score % 5 === 0 && gameSpeed < 6) {
                     gameSpeed += 0.3;
                 }
@@ -216,9 +250,10 @@
 
             let charBottom = parseInt(window.getComputedStyle(character).getPropertyValue("bottom"));
 
-            // 💥 ตัวเช็กระยะชนแบบใหม่ที่ปรับให้ตัวละครผอมของคุณโดยเฉพาะ!
-            // ตัวละครอยู่ left: 20px และกว้าง 50px (Hitbox จริงๆ จะอยู่ช่วง left: 20 ถึง 70)
-            if (obstacleLeft < 70 && obstacleLeft > 10 && charBottom <= 40) {
+            // 💥 ตัวเช็กระยะชนแบบใหม่ที่ใจดีขึ้น ไม่ชนทิพย์แล้ว!
+            // ตัวละครอยู่พิกัด 20px ถึง 70px (ลดขอบเพื่อความเป๊ะ เหลือ 35px ถึง 60px)
+            // ตัวสิ่งกีดขวางมีขนาด 40px (เราตรวจจับเฉพาะตอนที่มันเข้ามาลึกๆ เท่านั้น)
+            if (obstacleLeft < 55 && obstacleLeft > 30 && charBottom <= 35) {
                 isAlive = false;
                 
                 if (score > hiScore) {
