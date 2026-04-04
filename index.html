@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เกมแมวพาสเทลกระโดดดึ๋ง</title>
+    <title>เกมแมวพาสเทล V.5 (แก้กะพริบ)</title>
     <style>
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
             overflow: hidden;
             background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             font-family: Arial, sans-serif;
             touch-action: none;
         }
 
-        /* 🖼️ ขยายหน้าจอเกมให้ใหญ่ขึ้น (กว้าง 400px สูง 300px) */
+        /* 🖼️ ฉากเกมขนาด 400x300 ใหญ่เต็มตาตามสั่ง */
         #game-container {
             width: 400px;
             height: 300px;
@@ -33,7 +29,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* 🐈‍⬛ ตัวละครน้องแมว (ขนาด 100x100px) */
+        /* 🐈‍⬛ ตัวละครแมวขนาด 100x100 */
         #dino {
             width: 100px;
             height: 100px;
@@ -45,21 +41,20 @@
             background-position: center;
         }
 
-        /* ปรับอนิเมชั่นกระโดดให้ลอยสูงขึ้นและนานขึ้นตามขนาดฉากที่สูงขึ้น */
         .jump {
             animation: jumpAnimation 0.8s ease-out;
         }
 
         @keyframes jumpAnimation {
             0% { bottom: 5px; }
-            50% { bottom: 150px; } /* กระโดดสูงขึ้น */
+            50% { bottom: 150px; }
             100% { bottom: 5px; }
         }
 
-        /* 📦 สิ่งกีดขวางขยายใหญ่เต็มตา (ขนาด 70x70px) */
+        /* 📦 สิ่งกีดขวางขนาด 75x75 ใหญ่ขึ้นอีกนิด! */
         #cactus {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -68,51 +63,33 @@
             left: 400px;
         }
 
-        /* UI คะแนน */
         #score-board {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 16px;
-            font-weight: bold;
-            color: #535353;
+            top: 10px; left: 10px; right: 10px;
+            display: flex; justify-content: space-between;
+            font-size: 16px; font-weight: bold; color: #535353;
             z-index: 5;
         }
         .score-box {
             background-color: rgba(255, 255, 255, 0.8);
-            padding: 4px 8px;
-            border-radius: 5px;
+            padding: 4px 8px; border-radius: 5px;
         }
 
-        /* หน้าเมนูเริ่มต้นและจบเกม */
         #menu-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 10;
         }
 
         #menu-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff85a2;
-            margin-bottom: 15px;
-            text-align: center;
+            font-size: 24px; font-weight: bold; color: #ff85a2;
+            margin-bottom: 15px; text-align: center;
         }
 
         #menu-subtitle {
-            font-size: 16px;
-            color: #777;
+            font-size: 16px; color: #777;
             animation: flash 1.5s infinite;
         }
 
@@ -134,7 +111,7 @@
         <div id="cactus"></div>
 
         <div id="menu-overlay">
-            <div id="menu-title">เกมแมวพาสเทลจอมโดด</div>
+            <div id="menu-title">เกมแมวพาสเทล V.5 (แก้กะพริบ)</div>
             <div id="menu-subtitle">แตะที่หน้าจอเพื่อเริ่มเล่น</div>
         </div>
     </div>
@@ -152,29 +129,27 @@
         let score = 0;
         let hiScore = localStorage.getItem("catGameHiScore") || 0;
         let isAlive = false;
-        let gameSpeed = 1.2; // เริ่มต้นช้าสบายๆ
+        let gameSpeed = 1.0; 
         let cactusLeft = 400;
         let backgroundPos = 0;
         let gameLoopActive = false;
 
-        // ตัวแปรสำหรับคุมอนิเมชั่นเดิน (แก้บั๊กภาพกะพริบ)
         let walkInterval;
         let currentWalkFrame = 0;
 
-        // 🔗 ลิงก์รูปภาพตามที่คุณสั่งเป๊ะๆ
-        const imgStandAndWalk1 = 'https://i.postimg.cc/j5McR9YX/mi-m-ch-x-298-20260404141500.png'; // ท่ายืน/เดิน1
-        const imgWalk2 = 'https://i.postimg.cc/R0MwqRRd/mi-m-ch-x-298-20260404141503.png'; // ท่าเดิน2
-        const imgJump = 'https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png'; // ท่ากระโดด
+        // ลิงก์รูปภาพตามสั่ง
+        const imgStandAndWalk1 = 'https://i.postimg.cc/j5McR9YX/mi-m-ch-x-298-20260404141500.png'; // นิ่ง / เดิน 1
+        const imgWalk2 = 'https://i.postimg.cc/R0MwqRRd/mi-m-ch-x-298-20260404141503.png'; // เดิน 2
+        const imgJump = 'https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png'; // กระโดด
         
         const obstacleImages = [
             'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png', // ปลา
             'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'  // กล่อง
         ];
 
-        // โหลดคะแนนสูงสุด
         hiScoreDisplay.innerText = "สูงสุด: " + hiScore;
         
-        // ตั้งรูปเริ่มต้นเป็นท่ายืนนิ่ง
+        // รูปเริ่มต้นคือรูป ยืนนิ่ง
         dino.style.backgroundImage = `url('${imgStandAndWalk1}')`;
 
         function setRandomObstacle() {
@@ -182,30 +157,25 @@
             cactus.style.backgroundImage = `url('${obstacleImages[randomIndex]}')`;
         }
 
-        // ระบบสลับภาพเดินเพื่อแก้บั๊กภาพกะพริบ
+        // ระบบสลับรูปเดินแบบตรงไปตรงมา ป้องกันภาพกระพริบ
         function startWalkingAnimation() {
             clearInterval(walkInterval);
             walkInterval = setInterval(() => {
                 if (!dino.classList.contains("jump") && isAlive) {
-                    if (currentWalkFrame === 0) {
-                        dino.style.backgroundImage = `url('${imgStandAndWalk1}')`;
-                        currentWalkFrame = 1;
-                    } else {
-                        dino.style.backgroundImage = `url('${imgWalk2}')`;
-                        currentWalkFrame = 0;
-                    }
+                    currentWalkFrame = (currentWalkFrame === 0) ? 1 : 0;
+                    dino.style.backgroundImage = `url('${currentWalkFrame === 0 ? imgStandAndWalk1 : imgWalk2}')`;
                 }
-            }, 300); // สลับรูปทุกๆ 0.3 วินาที (ไม่เร็วเกินไป)
+            }, 300); 
         }
 
         function jump() {
             if (!dino.classList.contains("jump") && isAlive) {
                 dino.classList.add("jump");
-                dino.style.backgroundImage = `url('${imgJump}')`; // เปลี่ยนเป็นรูปกระโดดทันที
+                dino.style.backgroundImage = `url('${imgJump}')`; // เปลี่ยนเป็นภาพกระโดด
                 
                 setTimeout(function () {
                     dino.classList.remove("jump");
-                    // พอกลับมาถึงพื้นให้แสดงผลเป็นรูปเดินต่อทันที
+                    // พอกลับถึงพื้น ให้เปลี่ยนเป็นภาพเดินล่าสุด
                     dino.style.backgroundImage = `url('${currentWalkFrame === 0 ? imgStandAndWalk1 : imgWalk2}')`;
                 }, 800);
             }
@@ -218,11 +188,11 @@
                 menuOverlay.style.display = "none";
                 isAlive = true;
                 score = 0;
-                gameSpeed = 1.2;
+                gameSpeed = 1.0; // ช้ามากเหมือนเต่าคลานตามสั่ง
                 cactusLeft = 400;
                 scoreDisplay.innerText = "คะแนน: 0";
                 setRandomObstacle();
-                startWalkingAnimation(); // เริ่มอนิเมชั่นเดิน
+                startWalkingAnimation();
                 
                 if (!gameLoopActive) {
                     gameLoop();
@@ -243,19 +213,16 @@
             }
             gameLoopActive = true;
 
-            // เลื่อนพื้นหลัง
             backgroundPos -= gameSpeed / 2;
             gameContainer.style.backgroundPosition = backgroundPos + "px 0";
 
-            // เลื่อนสิ่งกีดขวาง
             cactusLeft -= gameSpeed;
-            if (cactusLeft < -70) {
+            if (cactusLeft < -75) {
                 cactusLeft = 400;
                 setRandomObstacle();
                 score++;
                 scoreDisplay.innerText = "คะแนน: " + score;
                 
-                // ค่อยๆ เร็วขึ้นทุกๆ 5 คะแนน
                 if (score % 5 === 0 && gameSpeed < 8) {
                     gameSpeed += 0.3;
                 }
@@ -264,9 +231,8 @@
 
             let dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom"));
 
-            // 💥 เช็กการชน (ปรับ Hitbox ใหม่ให้ไม่หยุดเองมั่วซั่ว)
-            // ตัวแมวอยู่แถว left: 30px ถึง 110px กว้างจริง 100px แต่เราลบขอบรูปออกให้เหลือส่วนชนจริงแค่ 20px ถึง 80px
-            if (cactusLeft < 80 && cactusLeft > 10 && dinoBottom <= 60) {
+            // 💥 กล่องเช็กการชน (Hitbox) ที่สมดุลขึ้น
+            if (cactusLeft < 80 && cactusLeft > 10 && dinoBottom <= 65) {
                 isAlive = false;
                 
                 if (score > hiScore) {
