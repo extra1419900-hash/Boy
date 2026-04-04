@@ -5,21 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>เกมแมวพาสเทลกระโดดดึ๋ง</title>
     <style>
-        body {
+        /* ล็อกไม่ให้หน้าจอเลื่อนไปมาเวลาเล่น */
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            overflow: hidden;
         }
 
-        /* 🖼️ ปรับขนาดฉากเกมให้ใหญ่สะใจ (กว้าง 400px สูง 250px) */
+        /* 🖼️ ล็อกขนาดฉากเกมให้ใหญ่เต็มตากลางจอ */
         #game-container {
-            width: 400px;
-            height: 250px;
+            width: 360px;
+            height: 220px;
             border-bottom: 4px solid #535353;
             position: relative;
             overflow: hidden;
@@ -28,12 +31,13 @@
             background-repeat: repeat-x;
             background-color: #fff;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            touch-action: none; /* ล็อกไม่ให้หน้าจอซูมหรือเลื่อนเวลาแตะ */
         }
 
-        /* 🐈‍⬛ ขยายขนาดตัวละครน้องแมวเป็น 120x120 พิกเซล (ใหญ่เต็มตา) */
+        /* 🐈‍⬛ ตัวละครน้องแมวขนาดใหญ่กำลังดี 80x80 */
         #dino {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             position: absolute;
             bottom: 5px;
             left: 30px;
@@ -43,7 +47,6 @@
             background-position: center;
         }
 
-        /* คลาสสำหรับอนิเมชั่นเดิน (2 เฟรม) */
         .walking {
             animation: walkAnimation 0.6s steps(2) infinite;
         }
@@ -55,11 +58,10 @@
             }
             to {
                 background-image: url('https://i.postimg.cc/Bn5xqyxQ/mi-m-ch-x-298-20260404141502.png');
-                background-position: -240px; /* ขยายพิกัดตามขนาดตัวที่ใหญ่ขึ้น */
+                background-position: -160px;
             }
         }
 
-        /* ตอนกระโดดให้ใช้รูปโดด และปิดอนิเมชั่นเดิน */
         #dino.jumping {
             background-image: url('https://i.postimg.cc/R0MwqRRd/mi-m-ch-x-298-20260404141503.png');
             background-size: contain;
@@ -68,29 +70,29 @@
             animation: none;
         }
 
+        /* ปรับให้กระโดดลอยนานขึ้น หลบง่ายขึ้น */
         .jump {
-            animation: jumpAnimation 0.7s ease-out; /* ลอยนานขึ้นเล็กน้อยตามสเกลที่ใหญ่ขึ้น */
+            animation: jumpAnimation 0.8s ease-out;
         }
 
         @keyframes jumpAnimation {
             0% { bottom: 5px; }
-            50% { bottom: 130px; } /* ความสูงการโดดที่สัมพันธ์กับตัวละคร */
+            50% { bottom: 120px; }
             100% { bottom: 5px; }
         }
 
-        /* 📦 ขยายขนาดสิ่งกีดขวางเป็น 60x60 พิกเซล */
+        /* 📦 สิ่งกีดขวางขนาด 45x45 */
         #cactus {
-            width: 60px;
-            height: 60px;
+            width: 45px;
+            height: 45px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             position: absolute;
             bottom: 5px;
-            left: 400px;
+            left: 360px;
         }
 
-        /* UI คะแนน */
         #score-board {
             position: absolute;
             top: 10px;
@@ -98,17 +100,17 @@
             right: 10px;
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             color: #535353;
         }
         .score-box {
             background-color: rgba(255, 255, 255, 0.8);
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 5px;
         }
 
-        /* 🎬 หน้าเมนูก่อนเริ่มเล่น และหน้าจบเกม */
+        /* 🎬 หน้าเมนูเริ่มต้นและจบเกม (แตะตรงไหนของจอก็ได้เพื่อเริ่ม) */
         #menu-overlay {
             position: absolute;
             top: 0;
@@ -124,28 +126,22 @@
         }
 
         #menu-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff85a2; /* สีชมพูพาสเทลเข้ากับธีมคุณ */
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 0px #fff;
-        }
-
-        #play-btn {
-            padding: 12px 30px;
             font-size: 20px;
             font-weight: bold;
-            color: white;
-            background-color: #ffb3c6;
-            border: none;
-            border-radius: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: 0.2s;
+            color: #ff85a2;
+            margin-bottom: 10px;
+            text-align: center;
         }
 
-        #play-btn:active {
-            transform: scale(0.95);
+        #menu-subtitle {
+            font-size: 14px;
+            color: #777;
+            animation: flash 1.5s infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
     </style>
 </head>
@@ -160,9 +156,9 @@
         <div id="dino"></div>
         <div id="cactus"></div>
 
-        <div id="menu-overlay">
+        <div id="menu-overlay" onclick="triggerAction()">
             <div id="menu-title">เกมแมวพาสเทลจอมโดด</div>
-            <button id="play-btn" onclick="startGame()">PLAY</button>
+            <div id="menu-subtitle">แตะที่หน้าจอเพื่อเริ่มเล่น</div>
         </div>
     </div>
 
@@ -174,20 +170,20 @@
         const gameContainer = document.getElementById("game-container");
         const menuOverlay = document.getElementById("menu-overlay");
         const menuTitle = document.getElementById("menu-title");
+        const menuSubtitle = document.getElementById("menu-subtitle");
 
         let score = 0;
-        let hiScore = localStorage.getItem("catGameHiScore") || 0; // ดึงคะแนนสูงสุดที่เซฟไว้
+        let hiScore = localStorage.getItem("catGameHiScore") || 0;
         let isAlive = false;
-        let gameSpeed = 1.8; // 🐢 ปรับให้วิ่งช้าโคตรๆ ในตอนแรก (เดิม 2.5) เพื่อความชิลล์
-        let cactusLeft = 400;
+        let gameSpeed = 1.0; // 🐢 ปรับให้ช้าสุดขีดเท่าที่เป็นไปได้ (เดิม 1.8) ช้าเหมือนเต่าคลาน!
+        let cactusLeft = 360;
         let backgroundPos = 0;
 
         const obstacleImages = [
-            'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png', // ปลา
-            'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'  // กล่อง
+            'https://i.postimg.cc/bwR36dVK/mi-m-ch-x-298-20260404141505.png',
+            'https://i.postimg.cc/zB4jLh3f/mi-m-ch-x-298-20260404141507.png'
         ];
 
-        // อัปเดตการแสดงผลคะแนนสูงสุดตอนเปิดหน้าเว็บ
         hiScoreDisplay.innerText = "สูงสุด: " + hiScore;
 
         function setRandomObstacle() {
@@ -203,69 +199,70 @@
                 setTimeout(function () {
                     dino.classList.remove("jump");
                     dino.classList.remove("jumping");
-                }, 700);
+                }, 800); // 0.8 วินาที
             }
         }
 
-        // ฟังก์ชันเริ่มเกม (เรียกใช้เมื่อกดปุ่ม Play)
-        function startGame() {
-            menuOverlay.style.display = "none"; // ซ่อนหน้าเมนู
-            isAlive = true;
-            score = 0;
-            gameSpeed = 1.8;
-            cactusLeft = 400;
-            scoreDisplay.innerText = "คะแนน: 0";
-            dino.classList.add("walking"); // เริ่มอนิเมชั่นเดิน
-            setRandomObstacle();
-            gameLoop();
+        // ฟังก์ชันสั่งงานด้วยการแตะ (รวมทั้งเริ่มเกมและกระโดดไว้ที่เดียว)
+        function triggerAction() {
+            if (!isAlive) {
+                // ถ้าเกมยังไม่เริ่ม ให้เริ่มเกม
+                menuOverlay.style.display = "none";
+                isAlive = true;
+                score = 0;
+                gameSpeed = 1.0; // ความเร็วเริ่มต้นช้ามาก
+                cactusLeft = 360;
+                scoreDisplay.innerText = "คะแนน: 0";
+                dino.classList.add("walking");
+                setRandomObstacle();
+                gameLoop();
+            } else {
+                // ถ้าเกมเริ่มแล้ว ให้กระโดด
+                jump();
+            }
         }
 
-        // แตะที่ฉากเพื่อกระโดด (สำหรับมือถือ)
+        // แตะที่ตัวฉากเกมเพื่อเล่น/กระโดด (ใช้ได้ชัวร์บนมือถือ)
         gameContainer.addEventListener("touchstart", function (e) {
-            e.preventDefault();
-            jump();
+            e.preventDefault(); // บล็อกระบบการซูมของแอปมือถือ
+            triggerAction();
         });
 
         function gameLoop() {
             if (!isAlive) return;
 
-            // เลื่อนพื้นหลังให้สัมพันธ์กับการเล่น (ขยับแบบ Manual เพื่อให้หยุดพร้อมเกมได้)
             backgroundPos -= gameSpeed / 2;
             gameContainer.style.backgroundPosition = backgroundPos + "px 0";
 
-            // เลื่อนสิ่งกีดขวาง
             cactusLeft -= gameSpeed;
-            if (cactusLeft < -60) {
-                cactusLeft = 400;
+            if (cactusLeft < -45) {
+                cactusLeft = 360;
                 setRandomObstacle();
                 score++;
                 scoreDisplay.innerText = "คะแนน: " + score;
                 
-                // ค่อยๆ เพิ่มความเร็วแบบเนิบๆ ทุก 3 คะแนน
-                if (score % 3 === 0 && gameSpeed < 8) {
-                    gameSpeed += 0.3;
+                // เพิ่มความเร็วทีละนิดดดดด ทุกๆ 4 คะแนน
+                if (score % 4 === 0 && gameSpeed < 6) {
+                    gameSpeed += 0.2;
                 }
             }
             cactus.style.left = cactusLeft + "px";
 
             let dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom"));
 
-            // 💥 ตรวจสอบการชนสำหรับร่างยักษ์
-            // ตัวละครกว้าง 120px อยู่ที่ left: 30px ถึง 150px
-            // สิ่งกีดขวางกว้าง 60px
-            if (cactusLeft < 130 && cactusLeft > 10 && dinoBottom <= 60) {
+            // 💥 เช็กการชน (น้องแมวอยู่แถว left: 30px ถึง 110px)
+            if (cactusLeft < 100 && cactusLeft > 10 && dinoBottom <= 45) {
                 isAlive = false;
-                dino.classList.remove("walking"); // หยุดเดิน
+                dino.classList.remove("walking");
                 
-                // ตรวจสอบและบันทึกคะแนนสูงสุด
                 if (score > hiScore) {
                     hiScore = score;
-                    localStorage.setItem("catGameHiScore", hiScore); // เซฟลงเครื่อง
+                    localStorage.setItem("catGameHiScore", hiScore);
                     hiScoreDisplay.innerText = "สูงสุด: " + hiScore;
                 }
 
-                // แสดงผลหน้าจบเกม
-                menuTitle.innerText = "เกมจบแล้ว! (ได้ " + score + " คะแนน)";
+                menuTitle.innerText = "จบเกม! ได้ " + score + " คะแนน";
+                menuSubtitle.innerText = "แตะที่หน้าจออีกครั้งเพื่อเริ่มใหม่";
                 menuOverlay.style.display = "flex";
             }
 
