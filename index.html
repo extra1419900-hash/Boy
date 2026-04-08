@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เกมกระโดดข้ามหัวใจ V.แก้ไขการมองเห็น</title>
+    <title>เกมกระโดดข้ามหัวใจ V.แก้จุดเกิด</title>
     <style>
         html, body {
             margin: 0; padding: 0;
@@ -14,7 +14,7 @@
             touch-action: none;
         }
 
-        /* จอใหญ่ 800px ที่คุณชอบ */
+        /* จอใหญ่ 800px */
         #game-container {
             width: 800px;
             height: 400px;
@@ -49,13 +49,12 @@
             100% { bottom: 20px; }
         }
 
-        /* ปรับให้ตำแหน่งเริ่มต้นอยู่ขวาสุดของจอ 800px */
         #obstacle {
             width: 80px;
             height: 80px;
             position: absolute;
             bottom: 20px;
-            left: 800px; 
+            left: 850px; /* ให้ไปรออยู่นอกจอนิดนึง */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -66,7 +65,6 @@
             position: absolute;
             top: 20px; left: 20px;
             font-size: 24px; font-weight: bold; color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 5;
         }
 
@@ -102,15 +100,12 @@
 
     <div id="game-container">
         <div id="score-board">คะแนน: <span id="score">0</span> | สูงสุด: <span id="hi-score">0</span></div>
-        
         <div id="character"></div>
         <div id="obstacle"></div>
-
         <div id="menu-overlay">
             <h1 id="status-text">พร้อมไหม?</h1>
-            <button style="padding: 15px 40px; font-size: 20px; cursor:pointer;" onclick="startGame()">เริ่มเล่นเลย!</button>
+            <button style="padding: 15px 40px; font-size: 20px;" onclick="startGame()">เริ่มเล่น!</button>
         </div>
-
         <button id="jump-btn">JUMP</button>
         <button id="reset-btn" onclick="resetGame()">RESET</button>
     </div>
@@ -126,8 +121,8 @@
         let score = 0;
         let hiScore = localStorage.getItem("hiScore") || 0;
         let isAlive = false;
-        let obstacleLeft = 800; // ตั้งให้เท่ากับความกว้างจอ
-        let gameSpeed = 7; // เพิ่มความเร็วขึ้นนิดนึงจะได้ไม่ต้องรอนาน
+        let obstacleLeft = 850; 
+        let gameSpeed = 8; 
 
         hiScoreText.innerText = hiScore;
 
@@ -153,10 +148,9 @@
             menu.style.display = "none";
             isAlive = true;
             score = 0;
-            obstacleLeft = 800;
-            gameSpeed = 7;
+            obstacleLeft = 850;
+            gameSpeed = 8;
             scoreText.innerText = "0";
-            // สุ่มสิ่งกีดขวางชิ้นแรกทันที
             obstacle.style.backgroundImage = `url('${obsImgs[Math.floor(Math.random()*obsImgs.length)]}')`;
             requestAnimationFrame(gameLoop);
         }
@@ -170,9 +164,8 @@
 
             obstacleLeft -= gameSpeed;
             
-            // เมื่อวิ่งพ้นจอซ้าย (-80) ให้ไปโผล่ขวาสุด (800)
-            if (obstacleLeft < -80) {
-                obstacleLeft = 800;
+            if (obstacleLeft < -100) {
+                obstacleLeft = 850;
                 score++;
                 scoreText.innerText = score;
                 gameSpeed += 0.2;
@@ -182,15 +175,16 @@
 
             let charBottom = parseInt(window.getComputedStyle(character).getPropertyValue("bottom"));
 
-            // ปรับ Hitbox ให้แม่นยำขึ้นสำหรับจอใหญ่
-            // ถ้าหัวใจวิ่งมาถึงช่วง 50-120px และตัวละครไม่ได้โดดสูงพ้น 80px = ชน
-            if (obstacleLeft < 120 && obstacleLeft > 50 && charBottom <= 80) {
+            // 💥 แก้ไข Hitbox ให้ชนยากขึ้น (ต้องชนจังๆ ถึงจะตาย)
+            // ระยะ X: ตัวละครอยู่ 50-150px -> บีบเหลือ 80-120px
+            // ระยะ Y: ตัวละครสูง 100px -> บีบเหลือ 70px
+            if (obstacleLeft < 120 && obstacleLeft > 80 && charBottom <= 70) {
                 isAlive = false;
                 if (score > hiScore) {
                     localStorage.setItem("hiScore", score);
                     hiScoreText.innerText = score;
                 }
-                document.getElementById("status-text").innerText = "จบเกม! ได้ " + score + " คะแนน";
+                document.getElementById("status-text").innerText = "จบเกม! " + score + " คะแนน";
                 menu.style.display = "flex";
             }
 
